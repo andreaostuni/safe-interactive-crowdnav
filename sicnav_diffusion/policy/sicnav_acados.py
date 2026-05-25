@@ -20,10 +20,14 @@ from sicnav.utils.mpc_utils.orca_c_wrapper import ORCACWrapper # for ground trut
 
 from crowd_sim_plus.envs.utils.state_plus import FullState, FullyObservableJointState
 import sys
-
-from sicnav_diffusion.JMID.mid_sim_wrapper import HumanTrajectoryForecasterSim
-
-import einops
+try:
+    from sicnav_diffusion.JMID.mid_sim_wrapper import HumanTrajectoryForecasterSim
+except ImportError as e:
+    print(f"Error importing HumanTrajectoryForecasterSim: {e}")
+try:
+    import einops
+except ImportError as e:
+    print(f"Error importing einops: {e}")
 
 
 DO_DEBUG = False
@@ -1070,7 +1074,12 @@ class SICNavAcados(Policy):
             'config' : policy_config,
             'env_config' : env_config,
         }
-        self.mpc_env = MPCEnv(self.time_step, dummy_state, self.num_hums, self.horiz, policy_config, env_config, isSim=True)
+        # Default False (= the original real-robot solver-tuning branch). The
+        # Nav2 controller can override by setting `policy.isSim = True` BEFORE
+        # set_env to benchmark the sim branch (uniform iter caps + lenient
+        # acceptance); solver options are baked at codegen, so this must be set
+        # pre-set_env to take effect on iter caps (not just the runtime gate).
+        self.mpc_env = MPCEnv(self.time_step, dummy_state, self.num_hums, self.horiz, policy_config, env_config, isSim=getattr(self, 'isSim', False))
 
 
 

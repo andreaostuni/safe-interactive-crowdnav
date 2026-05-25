@@ -5,7 +5,7 @@ import logging
 import sys
 import pandas as pd
 
-import gym
+import gymnasium as gym
 import numpy as np
 from stable_baselines3 import DQN
 from stable_baselines3.common.env_checker import check_env

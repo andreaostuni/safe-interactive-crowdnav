@@ -48,7 +48,13 @@ def export_campc_model(mpc_env):
 def export_campc_ocp(mpc_env, file_run_id=None):
 
 
-    hash = mpc_env.config_hash
+    # config_hash is derived from the env/policy config files only. num_stat_obs
+    # and num_hums come from len(joint_state.*) at runtime (e.g. the Nav2
+    # controller's max_static_segments), NOT from those files, so they must be
+    # folded into the cache key. Otherwise two runs with different obstacle/human
+    # counts collide on the same generated C code and acados is fed parameter
+    # vectors of the wrong dimension.
+    hash = '{:}_h{:d}_s{:d}'.format(mpc_env.config_hash, mpc_env.num_hums, mpc_env.num_stat_obs)
     code_export_dir = 'acados_cache/c_generated_code_{:}'.format(hash)
     json_file = 'acados_cache/acados_sicnav_mpc_{:}.json'.format(hash)
     # code_export_dir = 'c_generated_code_0' if file_run_id is None else 'c_generated_code_{:}'.format(file_run_id)
@@ -405,7 +411,12 @@ def export_campc_ocp(mpc_env, file_run_id=None):
             # ocp.solver_options.ext_fun_compile_flags = "-O3 -mfma -ffast-math -mavx" # instead of -O2 which is the default, do more optimization (O3 is max)
             ocp.solver_options.ext_fun_compile_flags = "-O3 -ffast-math" # instead of -O2 which is the default, do more optimization (O3 is max)
         else:
-            ocp.solver_options.nlp_solver_type = 'SQP' # SQP_RTI, SQP
+            # Real-robot / Nav2 closed-loop: use SQP_RTI (one real-time SQP
+            # iteration per call) and the same -O3 -ffast-math codegen flags
+            # the sim branch uses. SQP_RTI is the acados-recommended scheme
+            # when warmstarting from the previous solve, which this policy does.
+            ocp.solver_options.nlp_solver_type = 'SQP_RTI'
+            ocp.solver_options.ext_fun_compile_flags = "-O3 -ffast-math"
             if mpc_env.hum_model == 'orca_casadi_kkt':
                 if mpc_env.human_pred_MID:
                     if mpc_env.num_hums == 1:

@@ -2,7 +2,7 @@ import configparser
 import os
 import argparse
 
-import gym
+import gymnasium as gym
 from RL_nav.SB3_models.DQNGeneral import DQNGeneral
 from stable_baselines3.common.env_checker import check_env
 import torch

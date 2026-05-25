@@ -7,6 +7,18 @@ import casadi as cs
 from sicnav.utils.mpc_utils.orca_c_wrapper import get_human_radii, get_human_goals
 
 numstab_epsilon = 1e-6
+CASADI_JIT_DIR_ENV = "SICNAV_CASADI_JIT_DIR"
+DEFAULT_CASADI_JIT_DIR = "casadi_jit"
+
+def configure_casadi_jit_dir(opts, jit_name):
+    jit_dir = os.environ.get(CASADI_JIT_DIR_ENV) or DEFAULT_CASADI_JIT_DIR
+    jit_dir = os.path.abspath(os.path.expanduser(jit_dir))
+    os.makedirs(jit_dir, exist_ok=True)
+
+    opts["jit_name"] = jit_name
+    jit_options = dict(opts.get("jit_options", {}))
+    jit_options["directory"] = jit_dir + os.sep
+    opts["jit_options"] = jit_options
 
 def det(vector1, vector2):
     return vector1[0] * vector2[1] - vector1[1] * vector2[0]
@@ -891,12 +903,19 @@ class casadiORCA(object):
             opts["compiler"] = "shell"
             # opts["jit_options"] = {"verbose":True, "flags":["-O3", "-ffast-math", "-mfma", "-mavx"]}
             opts["jit_options"] = {"verbose":True, "flags":["-O3", "-ffast-math"]}
+            configure_casadi_jit_dir(opts, 'ws_solver_hum{:}'.format(humA_idx))
 
             opts["max_iter"] = 10
             opts["regularity_check"] = True
             opts["qpsol_options"] = {"printLevel":"none","enableRegularisation":True}
             opts["print_iteration"] = False
             opts["print_header"] = False
+            # blocksqp needs an inertia-revealing (neig) Hessian factorization.
+            # 'ldl' is bundled with casadi and inertia-aware; the default is
+            # slower and 'mumps' lacks neig. HSL ma57 is NOT usable here (casadi
+            # has no ma57 Linsol plugin; HSL only accelerates the ipopt/campc
+            # path). This is the documented speed lever for the acados warmstart.
+            opts["linsol"] = "ldl"
 
             solver = cs.nlpsol('ws_solver_hum{:}'.format(humA_idx), 'blocksqp', prob, opts)
 
@@ -1056,12 +1075,18 @@ class casadiORCA(object):
         opts["compiler"] = "shell"
         # opts["jit_options"] = {"verbose":True, "flags":["-O3", "-ffast-math", "-mfma", "-mavx"]}
         opts["jit_options"] = {"verbose":True, "flags":["-O3", "-ffast-math"]}
+        configure_casadi_jit_dir(opts, 'solver_robws')
         opts["qpsol"] = "qpoases"
         opts["regularity_check"] = True
         opts["qpsol_options"] = {"printLevel":"none", "enableRegularisation":True}
         opts["max_iter"] = 10
         opts["print_iteration"] = False
         opts["print_header"] = False
+        # blocksqp needs an inertia-revealing (neig) factorization. 'ldl' is
+        # bundled and inertia-aware (default is slower; 'mumps' lacks neig).
+        # HSL ma57 is NOT usable here (no casadi ma57 Linsol plugin; HSL only
+        # helps the ipopt/campc path). Documented acados-warmstart speed lever.
+        opts["linsol"] = "ldl"
 
         solver = cs.nlpsol('solver_robws', 'blocksqp', prob, opts)
 

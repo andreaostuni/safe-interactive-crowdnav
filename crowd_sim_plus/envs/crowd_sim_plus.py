@@ -2,8 +2,8 @@ import logging
 import itertools
 from copy import deepcopy
 
-import gym
-from gym import spaces
+import gymnasium as gym
+from gymnasium import spaces
 import matplotlib.lines as mlines
 import numpy as np
 

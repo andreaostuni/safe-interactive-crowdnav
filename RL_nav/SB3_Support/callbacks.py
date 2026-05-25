@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Union
 import shutil
 
-import gym
+import gymnasium as gym
 import numpy as np
 
 try:

@@ -6,7 +6,7 @@ import os
 import pickle
 import torch
 import numpy as np
-import gym
+import gymnasium as gym
 
 from sicnav_diffusion.policy.policy_factory import policy_factory
 from crowd_sim_plus.envs.utils.robot_plus import Robot, RobotFullKnowledge
@@ -106,7 +106,7 @@ def main():
     else:
         args.num_humans = env_config.getint('sim', 'human_num')
 
-    env_order = gym.make('CrowdSimPlus-v0')
+    env_order = gym.make('CrowdSimPlus-v0', disable_env_checker=True)  # gym>=0.26: CrowdSimPlus sets action_space in configure(), not __init__
     env = env_order.unwrapped # needed
 
     env.configure(env_config)
