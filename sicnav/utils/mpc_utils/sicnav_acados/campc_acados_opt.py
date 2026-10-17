@@ -48,7 +48,9 @@ def export_campc_model(mpc_env):
 def export_campc_ocp(mpc_env, file_run_id=None):
 
 
-    hash = mpc_env.config_hash
+    # [nav2-minimal] num_hums/num_stat_obs come from the runtime state, not the config files hashed
+    # into config_hash, so they must be part of the cache key or a stale build is reloaded.
+    hash = '{:}_h{:d}_s{:d}'.format(mpc_env.config_hash, mpc_env.num_hums, mpc_env.num_stat_obs)
     code_export_dir = 'acados_cache/c_generated_code_{:}'.format(hash)
     json_file = 'acados_cache/acados_sicnav_mpc_{:}.json'.format(hash)
     # code_export_dir = 'c_generated_code_0' if file_run_id is None else 'c_generated_code_{:}'.format(file_run_id)

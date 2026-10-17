@@ -106,7 +106,7 @@ def main():
     else:
         args.num_humans = env_config.getint('sim', 'human_num')
 
-    env_order = gym.make('CrowdSimPlus-v0')
+    env_order = gym.make('CrowdSimPlus-v0', disable_env_checker=True)  # [nav2-minimal] gym>=0.26
     env = env_order.unwrapped # needed
 
     env.configure(env_config)

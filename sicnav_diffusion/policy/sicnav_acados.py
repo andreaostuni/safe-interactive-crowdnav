@@ -21,9 +21,11 @@ from sicnav.utils.mpc_utils.orca_c_wrapper import ORCACWrapper # for ground trut
 from crowd_sim_plus.envs.utils.state_plus import FullState, FullyObservableJointState
 import sys
 
-from sicnav_diffusion.JMID.mid_sim_wrapper import HumanTrajectoryForecasterSim
-
-import einops
+try:  # [nav2-minimal] only the MID (diffusion) predictor needs these; CVG (human_goal_cvmm) runs without them
+    from sicnav_diffusion.JMID.mid_sim_wrapper import HumanTrajectoryForecasterSim
+    import einops
+except ImportError:  # e.g. ncls/einops not installed
+    HumanTrajectoryForecasterSim = einops = None
 
 
 DO_DEBUG = False
@@ -1070,7 +1072,7 @@ class SICNavAcados(Policy):
             'config' : policy_config,
             'env_config' : env_config,
         }
-        self.mpc_env = MPCEnv(self.time_step, dummy_state, self.num_hums, self.horiz, policy_config, env_config, isSim=True)
+        self.mpc_env = MPCEnv(self.time_step, dummy_state, self.num_hums, self.horiz, policy_config, env_config, isSim=getattr(self, 'isSim', True))  # [nav2-minimal] caller may set isSim=False
 
 
 
