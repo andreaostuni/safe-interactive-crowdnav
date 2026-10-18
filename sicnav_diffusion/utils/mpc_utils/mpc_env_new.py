@@ -235,6 +235,8 @@ class MPCEnv(object):
         self.max_rot = config.getfloat('mpc_env', 'max_rot_degrees') * np.pi / 180.0
         self.max_l_acc = config.getfloat('mpc_env', 'max_l_acc')
         self.max_l_dcc = config.getfloat('mpc_env', 'max_l_dcc')
+        # [nav2-minimal] acados Hessian ('EXACT' as upstream, or 'GAUSS_NEWTON'); part of config_hash
+        self.hessian_approx = config.get('mpc_env', 'hessian_approx', fallback='EXACT')
 
 
         self.human_goal_cvmm = config.getboolean('campc', 'human_goal_cvmm')

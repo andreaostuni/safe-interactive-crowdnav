@@ -389,7 +389,7 @@ def export_campc_ocp(mpc_env, file_run_id=None):
         ocp.solver_options.qp_solver = 'FULL_CONDENSING_HPIPM' # 'PARTIAL_CONDENSING_HPIPM', 'FULL_CONDENSING_QPOASES', 'FULL_CONDENSING_HPIPM', 'PARTIAL_CONDENSING_QPDUNES', 'PARTIAL_CONDENSING_OSQP', 'FULL_CONDENSING_DAQP').
         # Default: 'PARTIAL_CONDENSING_HPIPM'
 
-        ocp.solver_options.hessian_approx = 'EXACT' # 'GAUSS_NEWTON', 'EXACT'
+        ocp.solver_options.hessian_approx = getattr(mpc_env, 'hessian_approx', 'EXACT') # 'GAUSS_NEWTON', 'EXACT' [nav2-minimal] set by the policy config
         ocp.solver_options.regularize_method = 'PROJECT' # 'NO_REGULARIZE', 'MIRROR', 'PROJECT', 'PROJECT_REDUC_HESS', 'CONVEXIFY'
         ocp.solver_options.integrator_type = 'DISCRETE'
         ocp.solver_options.print_level = 0
@@ -475,7 +475,7 @@ def export_campc_ocp(mpc_env, file_run_id=None):
         ocp.solver_options.qp_solver = 'FULL_CONDENSING_QPOASES' # 'PARTIAL_CONDENSING_HPIPM', 'FULL_CONDENSING_QPOASES', 'FULL_CONDENSING_HPIPM', 'PARTIAL_CONDENSING_QPDUNES', 'PARTIAL_CONDENSING_OSQP', 'FULL_CONDENSING_DAQP').
         # Default: 'PARTIAL_CONDENSING_HPIPM'
 
-        ocp.solver_options.hessian_approx = 'EXACT' # 'GAUSS_NEWTON', 'EXACT'
+        ocp.solver_options.hessian_approx = getattr(mpc_env, 'hessian_approx', 'EXACT') # 'GAUSS_NEWTON', 'EXACT' [nav2-minimal] set by the policy config
         ocp.solver_options.regularize_method = 'PROJECT' # 'NO_REGULARIZE', 'MIRROR', 'PROJECT', 'PROJECT_REDUC_HESS', 'CONVEXIFY'
         ocp.solver_options.integrator_type = 'DISCRETE'
         ocp.solver_options.print_level = 0
